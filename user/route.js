@@ -37,15 +37,17 @@ Router.post('/', async (req, res) => {
   user = new User(req.body);
   const result = await user.save();
 
-  res.status(200).send(result);
+  res.status(201).send(result);
 });
 
 Router.patch('/:id', auth, async (req, res) => {
   const { passwd } = req.body;
+  const { id } = req.params;
+
   const user = await User.findById(id).select({
     passwd: 1
   });
-
+console.log(passwd, user.passwd)
   const match = await bcrypt.compare(passwd, user.passwd);
 
   if (!match) {
@@ -56,7 +58,7 @@ Router.patch('/:id', auth, async (req, res) => {
   delete req.body['passwd'];
   delete req.body['tokens'];
 
-  user = await User.findByIdAndUpdate(req.params.id, req.body, {
+  user = await User.findByIdAndUpdate(id, { $set: { ...req.body } }, {
     new: true
   });
 

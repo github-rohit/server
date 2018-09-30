@@ -15,7 +15,11 @@ process.on('uncaughtException', ex => {
   console.log('uncaughtException', ex);
 });
 
-// server.use(express.cookieParser());
+server.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  next();
+});
 server.use(express.json());
 server.use(helmet());
 server.use(cookieParser());

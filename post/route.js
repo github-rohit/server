@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 
 Router.get('/', async (req, res) => {
   const query = getQuery(req.query);
-  const { page = 1, limit = 2 } = req.query;
+  const { page = 1, limit = 12 } = req.query;
 
   const posts = await Post.find(query)
     .sort({ created_on: -1 })
@@ -13,11 +13,16 @@ Router.get('/', async (req, res) => {
     .limit(+limit)
     .populate('created_by', 'name');
 
-  res.status(200).send(posts);
+  const total = await Post.count(query);
+
+  res.status(200).send({
+    posts,
+    total
+  });
 });
 
 Router.get('/:id', async (req, res) => {
-  const post = await Post.findById(req.params.id);
+  const post = await Post.findById(req.params.id).populate('created_by', 'name');;
 
   if (!post) {
     return res.status(404).send(`Post with the given ID was not found.`);
