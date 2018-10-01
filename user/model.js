@@ -2,7 +2,6 @@ const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 const Schema = mongoose.Schema;
 
 const dbSchema = new Schema({
@@ -92,21 +91,31 @@ const validate = function(data) {
     data,
     {
       email: Joi.string()
+        .required()
         .email()
         .min(6)
         .max(50)
-        .required()
         .label('email'),
       name: Joi.string()
+        .required()
         .min(3)
         .max(25)
-        .required()
         .label('Name'),
       passwd: Joi.string()
+        .required()
         .min(6)
         .max(15)
+        .label('Password'),
+      confirmPasswd: Joi.string()
         .required()
-        .label('Password')
+        .valid(Joi.ref('passwd'))
+        .options({
+          language: {
+            any: {
+              allowOnly: '!!Passwords do not match'
+            }
+          }
+        })
     },
     { abortEarly: false }
   );
@@ -117,15 +126,15 @@ const validateLogin = function(data) {
     data,
     {
       email: Joi.string()
+        .required()
         .email()
         .min(6)
         .max(50)
-        .required()
         .label('email'),
       passwd: Joi.string()
+        .required()
         .min(6)
         .max(15)
-        .required()
         .label('Password')
     },
     { abortEarly: false }

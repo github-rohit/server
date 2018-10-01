@@ -29,7 +29,9 @@ Router.post('/', async (req, res) => {
   let user = await User.findOne({ email });
 
   if (user) {
-    return res.status(403).send(`User with the given ID already exist.`);
+    return res.status(403).send({
+      msg: `User with the given ID already exist.`
+    });
   }
 
   req.body.passwd = await getEncryptPassword(passwd);
@@ -47,7 +49,7 @@ Router.patch('/:id', auth, async (req, res) => {
   const user = await User.findById(id).select({
     passwd: 1
   });
-console.log(passwd, user.passwd)
+
   const match = await bcrypt.compare(passwd, user.passwd);
 
   if (!match) {
@@ -58,9 +60,13 @@ console.log(passwd, user.passwd)
   delete req.body['passwd'];
   delete req.body['tokens'];
 
-  user = await User.findByIdAndUpdate(id, { $set: { ...req.body } }, {
-    new: true
-  });
+  user = await User.findByIdAndUpdate(
+    id,
+    { $set: { ...req.body } },
+    {
+      new: true
+    }
+  );
 
   res.status(200).send(user);
 });
