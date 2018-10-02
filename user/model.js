@@ -95,7 +95,7 @@ const validate = function(data) {
         .email()
         .min(6)
         .max(50)
-        .label('email'),
+        .label('Email'),
       name: Joi.string()
         .required()
         .min(3)
@@ -116,6 +116,7 @@ const validate = function(data) {
             }
           }
         })
+        .label('Password')
     },
     { abortEarly: false }
   );
@@ -128,13 +129,9 @@ const validateLogin = function(data) {
       email: Joi.string()
         .required()
         .email()
-        .min(6)
-        .max(50)
         .label('email'),
       passwd: Joi.string()
         .required()
-        .min(6)
-        .max(15)
         .label('Password')
     },
     { abortEarly: false }

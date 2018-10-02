@@ -30,7 +30,9 @@ Router.post('/', async (req, res) => {
 
   if (user) {
     return res.status(403).send({
-      msg: `User with the given ID already exist.`
+      errors: {
+        msg: `User with the given ID already exist.`
+      }
     });
   }
 
@@ -39,7 +41,9 @@ Router.post('/', async (req, res) => {
   user = new User(req.body);
   const result = await user.save();
 
-  res.status(201).send(result);
+  res.status(201).send({
+    success: true
+  });
 });
 
 Router.patch('/:id', auth, async (req, res) => {
@@ -82,13 +86,21 @@ Router.post('/login', async (req, res) => {
   });
 
   if (!user) {
-    return res.status(400).send(`Invalid username or password.`);
+    return res.status(400).send({
+      errors: {
+        msg: `Invalid username or password.`
+      }
+    });
   }
 
   const match = await bcrypt.compare(passwd, user.passwd);
 
   if (!match) {
-    return res.status(400).send(`Invalid username or password.`);
+    return res.status(400).send({
+      errors: {
+        msg: `Invalid username or password.`
+      }
+    });
   }
 
   const token = user.generateAuthToken();
@@ -99,7 +111,10 @@ Router.post('/login', async (req, res) => {
       secure: process.env.NODE_ENV === 'production'
     })
     .status(200)
-    .send(true);
+    .send({
+      success: true,
+      token
+    });
 });
 
 module.exports = Router;

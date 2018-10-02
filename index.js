@@ -1,6 +1,7 @@
 require('express-async-errors');
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const server = express();
 const db = require('./db');
@@ -16,14 +17,22 @@ process.on('uncaughtException', ex => {
 });
 
 server.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "*");
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3001');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+
   next();
 });
 server.use(express.json());
-server.use(helmet());
+
 server.use(cookieParser());
 server.use(express.urlencoded({ extended: true }));
+server.use(bodyParser.urlencoded({ extended: true }));
+server.use(bodyParser.json());
 
 require('./routes')(server);
 
