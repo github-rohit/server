@@ -22,7 +22,10 @@ Router.get('/', async (req, res) => {
 });
 
 Router.get('/:id', async (req, res) => {
-  const post = await Post.findById(req.params.id).populate('created_by', 'name');;
+  const post = await Post.findById(req.params.id).populate(
+    'created_by',
+    'name'
+  );
 
   if (!post) {
     return res.status(404).send(`Post with the given ID was not found.`);
@@ -32,9 +35,16 @@ Router.get('/:id', async (req, res) => {
 });
 
 Router.post('/', auth, async (req, res) => {
-  // const valid = await validate(req.body);
+  const { title, description, created_by, status } = req.body;
+  await validate({ title, description, created_by, status });
 
-  res.status(200).send('Post is working');
+  const post = new Post(req.body);
+  const result = await post.save();
+
+  res.status(201).send({
+    success: true,
+    post: result
+  });
 });
 
 Router.patch('/:id', auth, (req, res) => {

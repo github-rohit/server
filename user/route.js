@@ -39,7 +39,7 @@ Router.post('/', async (req, res) => {
   req.body.passwd = await getEncryptPassword(passwd);
 
   user = new User(req.body);
-  const result = await user.save();
+  await user.save();
 
   res.status(201).send({
     success: true

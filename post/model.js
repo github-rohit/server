@@ -7,7 +7,7 @@ const dbSchema = new Schema({
     type: String,
     required: true,
     minlength: 5,
-    maxlength: 50
+    maxlength: 120
   },
   description: {
     type: String,
@@ -47,13 +47,14 @@ const dbSchema = new Schema({
 const Post = mongoose.model('Post', dbSchema);
 
 const validate = function(data) {
-  return Join.validate(data, {
+  return Joi.validate(data, {
     title: Joi.string()
+      .required()
       .min(5)
-      .max(50)
-      .required(),
+      .max(120),
     description: Joi.string().required(),
-    status: Joi.string().required()
+    status: Joi.string().required(),
+    created_by: Joi.required()
   });
 };
 
