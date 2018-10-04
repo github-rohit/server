@@ -7,21 +7,25 @@ const dbSchema = new Schema({
     type: String,
     required: true,
     minlength: 5,
-    maxlength: 120
+    maxlength: 120,
+    text: true
   },
   description: {
     type: String,
-    required: true
+    required: true,
+    text: true
   },
   image: {
     type: String
   },
   category: {
     type: Array,
-    default: 'Uncategorized'
+    default: 'Uncategorized',
+    text: true
   },
   tags: {
-    type: Array
+    type: Array,
+    text: true
   },
   created_by: {
     type: Schema.ObjectId,
@@ -45,6 +49,11 @@ const dbSchema = new Schema({
 });
 
 const Post = mongoose.model('Post', dbSchema);
+
+Post.collection.createIndex({
+  title: 'text',
+  description: 'text'
+});
 
 const validate = function(data) {
   return Joi.validate(data, {

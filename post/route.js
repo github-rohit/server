@@ -63,10 +63,14 @@ Router.delete('/:id', auth, async (req, res) => {
 });
 
 function getQuery(query) {
-  const { status, createdBy, category, tags } = query;
+  const { status, createdBy, category, tags, q: reqQuery } = query;
   const searchQuery = {
     status: 'PUBLISHED'
   };
+
+  if (reqQuery) {
+    searchQuery.$text = { $search: reqQuery };
+  }
 
   if (createdBy) {
     searchQuery.created_by = createdBy;
