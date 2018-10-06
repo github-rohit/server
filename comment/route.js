@@ -21,7 +21,10 @@ Router.post('/', auth, async (req, res) => {
   const comment = new Comment(req.body);
   const result = await comment.save();
 
-  res.status(200).send(result);
+  res.status(200).send({
+    success: true,
+    comment: result
+  });
 });
 
 Router.delete('/:id', auth, async (req, res) => {

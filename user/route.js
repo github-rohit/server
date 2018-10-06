@@ -117,4 +117,12 @@ Router.post('/login', async (req, res) => {
     });
 });
 
+Router.post('/logout', async (req, res) => {
+  res.clearCookie('x-auth')
+    .status(200)
+    .send({
+      success: true
+    });
+});
+
 module.exports = Router;
