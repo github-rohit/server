@@ -65,9 +65,33 @@ Router.post('/:id', auth, async (req, res) => {
   });
 });
 
-Router.patch('/:id', auth, (req, res) => {
-  console.log('[Post POST is working]');
-  res.status(200).send('Post is working');
+Router.patch('/:id', auth, async (req, res) => {
+  const { title, description, created_by, status } = req.body;
+  await validate({ title, description, created_by, status });
+
+  const {id} = req.params;
+  let post = await Post.findById(id);
+
+  if (!post) {
+    return res.status(404).send({
+      errors: {
+        msg: `Post with the given ID was not found.`
+      }
+    });
+  }
+
+  post = await Post.findByIdAndUpdate(
+    id,
+    { $set: { ...req.body } },
+    {
+      new: true
+    }
+  );
+
+  res.status(200).send({
+    success: true,
+    post
+  });
 });
 
 Router.delete('/:id', auth, async (req, res) => {

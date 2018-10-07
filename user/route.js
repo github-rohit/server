@@ -2,6 +2,8 @@ const {
   User,
   validate,
   validateLogin,
+  validateUpdate,
+  validatePasswords,
   getEncryptPassword
 } = require('./model');
 const bcrypt = require('bcrypt');
@@ -17,7 +19,11 @@ Router.get('/:id', async (req, res) => {
   });
 
   if (!user) {
-    return res.status(404).send(`User with the given ID was not found.`);
+    return res.status(404).send({
+      errors: {
+        msg: `User with the given ID was not found.`
+      }
+    });
   }
 
   res.status(200).send(user);
@@ -46,19 +52,69 @@ Router.post('/', async (req, res) => {
   });
 });
 
+Router.post('/password', async (req, res) => {
+  console.log('ddd');
+  const { oldPasswd, passwd, confirmPasswd, id } = req.body;
+  await validatePasswords({ oldPasswd, passwd, confirmPasswd });
+
+  let user = await User.findOne({ _id: id });
+
+  if (!user) {
+    return res.status(403).send({
+      errors: {
+        msg: `User with the given ID was not found.`
+      }
+    });
+  }
+
+  const match = await bcrypt.compare(oldPasswd, user.passwd);
+
+  if (!match) {
+    return res.status(400).send({
+      errors: {
+        msg: `Invalid password.`
+      }
+    });
+  }
+
+  encryptPassword = await getEncryptPassword(passwd);
+
+  user = await User.findByIdAndUpdate(
+    id,
+    { $set: { passwd: encryptPassword } },
+    {
+      new: true
+    }
+  );
+
+  res.status(200).send({
+    success: true,
+    msg: 'Password updated successfully.'
+  });
+});
+
 Router.patch('/:id', auth, async (req, res) => {
-  const { passwd } = req.body;
+  const { passwd, name } = req.body;
+  await validateUpdate({ name });
   const { id } = req.params;
 
-  const user = await User.findById(id).select({
+  let user = await User.findById(id).select({
     passwd: 1
   });
 
-  const match = await bcrypt.compare(passwd, user.passwd);
-
-  if (!match) {
-    return res.status(400).send(`Invalid username or password.`);
+  if (!user) {
+    return res.status(404).send({
+      errors: {
+        msg: `User with the given ID was not found.`
+      }
+    });
   }
+
+  // const match = await bcrypt.compare(passwd, user.passwd);
+
+  // if (!match) {
+  //   return res.status(400).send(`Invalid username or password.`);
+  // }
 
   delete req.body['email'];
   delete req.body['passwd'];
@@ -72,7 +128,10 @@ Router.patch('/:id', auth, async (req, res) => {
     }
   );
 
-  res.status(200).send(user);
+  res.status(200).send({
+    success: true,
+    user: user
+  });
 });
 
 Router.post('/login', async (req, res) => {
@@ -118,7 +177,8 @@ Router.post('/login', async (req, res) => {
 });
 
 Router.post('/logout', async (req, res) => {
-  res.clearCookie('x-auth')
+  res
+    .clearCookie('x-auth')
     .status(200)
     .send({
       success: true

@@ -138,9 +138,58 @@ const validateLogin = function(data) {
   );
 };
 
+const validateUpdate = function(data) {
+  return Joi.validate(
+    data,
+    {
+      name: Joi.string()
+        .required()
+        .min(3)
+        .max(25)
+        .label('Name')
+    },
+    { abortEarly: false }
+  );
+};
+
+const validatePasswords = function(data) {
+  return Joi.validate(
+    data,
+    {
+      oldPasswd: Joi.string()
+        .required()
+        .label('Password'),
+      passwd: Joi.string()
+        .required()
+        .min(6)
+        .max(15)
+        .label('Password'),
+      confirmPasswd: Joi.string()
+        .required()
+        .valid(Joi.ref('passwd'))
+        .options({
+          language: {
+            any: {
+              allowOnly: '!!Passwords do not match'
+            }
+          }
+        })
+        .label('Password')
+    },
+    { abortEarly: false }
+  );
+};
+
 const getEncryptPassword = async passwd => {
   const salt = await bcrypt.genSalt(10);
   return bcrypt.hash(passwd, salt);
 };
 
-module.exports = { User, validate, validateLogin, getEncryptPassword };
+module.exports = {
+  User,
+  validate,
+  validateLogin,
+  validateUpdate,
+  validatePasswords,
+  getEncryptPassword
+};
