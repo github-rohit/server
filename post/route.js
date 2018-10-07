@@ -47,6 +47,24 @@ Router.post('/', auth, async (req, res) => {
   });
 });
 
+Router.post('/:id', auth, async (req, res) => {
+  const query = getQuery(req.query);
+  const { page = 1, limit = 12 } = req.query;
+
+  const posts = await Post.find({ ...query, status: req.query.status })
+    .sort({ created_on: -1 })
+    .skip((+page - 1) * +limit)
+    .limit(+limit)
+    .populate('created_by', 'name');
+
+  const total = await Post.count(query);
+
+  res.status(200).send({
+    posts,
+    total
+  });
+});
+
 Router.patch('/:id', auth, (req, res) => {
   console.log('[Post POST is working]');
   res.status(200).send('Post is working');
@@ -56,10 +74,17 @@ Router.delete('/:id', auth, async (req, res) => {
   const post = await Post.findByIdAndDelete(req.params.id);
 
   if (!post) {
-    return res.status(404).send(`Post with the given ID was not found.`);
+    return res.status(404).send({
+      errors: {
+        msg: `Post has been deleted successfully`
+      }
+    });
   }
 
-  res.status(200).send(post);
+  res.status(200).send({
+    success: true,
+    msg: `Post has been deleted successfully`
+  });
 });
 
 function getQuery(query) {
