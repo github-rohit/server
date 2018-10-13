@@ -166,7 +166,8 @@ Router.post('/login', async (req, res) => {
 
   res
     .cookie('x-auth', token, {
-      httpOnly: true
+      httpOnly: true,
+      domain: req.headers.origin
     })
     .status(200)
     .send({
