@@ -4,7 +4,12 @@ module.exports = function(req, res, next) {
   const token = req.cookies['x-auth'];
 
   if (!token) {
-    throw new Error(401);
+    console.log('x-auth', token);
+    res.status(401).send({
+      errors: {
+        msg: 'Access denied.'
+      }
+    });
   }
 
   try {
