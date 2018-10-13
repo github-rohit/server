@@ -166,8 +166,7 @@ Router.post('/login', async (req, res) => {
 
   res
     .cookie('x-auth', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'
+      httpOnly: true
     })
     .status(200)
     .send({
