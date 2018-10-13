@@ -4,7 +4,7 @@ module.exports = function(req, res, next) {
   const token = req.cookies['x-auth'];
 
   if (!token) {
-    return res.status(401).send('Access denied.');
+    throw new Error(401);
   }
 
   try {
@@ -12,6 +12,11 @@ module.exports = function(req, res, next) {
     req.user = decoded;
     next();
   } catch (ex) {
-    res.status(401).send('Access denied.');
+    console.log('x-auth', token);
+    res.status(401).send({
+      errors: {
+        msg: 'Access denied.'
+      }
+    });
   }
 };
